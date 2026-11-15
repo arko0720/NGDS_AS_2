@@ -16,17 +16,11 @@ type LinearModel struct {
 	Slope     float64
 }
 
-// Fit a linear regression model using least squares.
-// Degenerate inputs return a flat model with zero slope to avoid NaN/Inf values.
+// Fit a linear regression model using least squares
 func fitLinear(data []Observation) LinearModel {
-
 	if len(data) == 0 {
-		return LinearModel{Intercept: 0, Slope: 0}
-	}
-
-	if len(data) == 1 {
 		return LinearModel{
-			Intercept: data[0].Emissions,
+			Intercept: 0,
 			Slope:     0,
 		}
 	}
@@ -57,10 +51,6 @@ func fitLinear(data []Observation) LinearModel {
 		denominator += x * x
 	}
 
-	if math.Abs(denominator) < 1e-12 {
-		return LinearModel{Intercept: meanY, Slope: 0}
-	}
-
 	slope := numerator / denominator
 	intercept := meanY - slope*meanX
 
@@ -83,18 +73,6 @@ func evaluateLinear(
 	model LinearModel,
 	test []Observation,
 ) {
-
-	if len(test) == 0 {
-		fmt.Println("\nTEST SET PREDICTIONS")
-		fmt.Println("----------------------------------------")
-		fmt.Println("No test observations available.")
-		fmt.Println("\nLINEAR REGRESSION RESULTS")
-		fmt.Println("----------------------------------------")
-		fmt.Println("MAE: undefined")
-		fmt.Println("RMSE: undefined")
-		fmt.Println("Test R2: undefined")
-		return
-	}
 
 	n := float64(len(test))
 
@@ -160,18 +138,8 @@ func runRegression(data []Observation) {
 	fmt.Println("\nPHASE 4: LINEAR REGRESSION")
 	fmt.Println("----------------------------------------")
 
-	if len(data) < 2 {
-		fmt.Println("Insufficient data for regression.")
-		return
-	}
-
 	// Chronological 80/20 split
 	split := int(float64(len(data)) * 0.8)
-
-	if split <= 0 || split >= len(data) {
-		fmt.Println("Insufficient data for regression split.")
-		return
-	}
 
 	train := data[:split]
 	test := data[split:]

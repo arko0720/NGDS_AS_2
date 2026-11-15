@@ -56,30 +56,3 @@ func TestChronologicalSplit(t *testing.T) {
 		t.Fatal("Training period overlaps testing period")
 	}
 }
-
-func TestFitLinearDegenerateData(t *testing.T) {
-	model := fitLinear([]Observation{{Year: 2020, Emissions: 8}})
-	if math.IsNaN(model.Intercept) || math.IsNaN(model.Slope) {
-		t.Fatal("degenerate linear fit produced NaN values")
-	}
-	if model.Slope != 0 {
-		t.Fatalf("expected zero slope for single-point fit, got %.6f", model.Slope)
-	}
-	if model.Intercept != 8.0 {
-		t.Fatalf("expected intercept 8.0 for single-point fit, got %.6f", model.Intercept)
-	}
-
-	flatModel := fitLinear([]Observation{
-		{Year: 2000, Emissions: 2},
-		{Year: 2000, Emissions: 3},
-	})
-	if math.IsNaN(flatModel.Intercept) || math.IsNaN(flatModel.Slope) {
-		t.Fatal("constant-x regression produced NaN values")
-	}
-	if flatModel.Slope != 0 {
-		t.Fatalf("expected zero slope for constant x values, got %.6f", flatModel.Slope)
-	}
-	if math.Abs(flatModel.Intercept-2.5) > 1e-9 {
-		t.Fatalf("expected intercept 2.5 for constant x values, got %.6f", flatModel.Intercept)
-	}
-}

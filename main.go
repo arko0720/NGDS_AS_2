@@ -25,6 +25,39 @@ type Observation struct {
 	Emissions float64
 }
 
+func saveProcessedDataset(data []Observation) error {
+	file, err := os.Create("germany_co2_processed.csv")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+
+	// Write the processed dataset header.
+	if err := writer.Write([]string{
+		"Year",
+		"CO2_Mt_CO2e",
+	}); err != nil {
+		return err
+	}
+
+	// Export cleaned observations in chronological order.
+	for _, obs := range data {
+		row := []string{
+			strconv.Itoa(obs.Year),
+			strconv.FormatFloat(obs.Emissions, 'f', 6, 64),
+		}
+
+		if err := writer.Write(row); err != nil {
+			return err
+		}
+	}
+
+	writer.Flush()
+	return writer.Error()
+}
+
 func main() {
 
 	fmt.Println("========================================")
@@ -162,6 +195,14 @@ func main() {
 	sort.Slice(data, func(i, j int) bool {
 		return data[i].Year < data[j].Year
 	})
+
+	// STEP 4: EXPORT PROCESSED DATASET
+	if err := saveProcessedDataset(data); err != nil {
+		fmt.Println("Error exporting processed dataset:", err)
+		return
+	}
+
+	fmt.Println("Processed dataset saved: germany_co2_processed.csv")
 
 	// STEP 4: Display data quality report
 	fmt.Println("\nDATA QUALITY REPORT")
